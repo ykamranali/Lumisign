@@ -13,7 +13,7 @@ export function connectSocket(): Socket {
   if (socket) return socket;
   const token = getToken();
   if (!token) return null as any;
-  socket = io(SOCKET_URL, {
+  socket = io(SOCKET_URL || undefined, {
     auth: { token, type: 'dashboard' },
     transports: ['websocket', 'polling'],
     reconnection: true,

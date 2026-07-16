@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+out
+**/out
+apps
+packages
+web/.next
+server/uploads
+*.log
+Dockerfile
+.dockerignore

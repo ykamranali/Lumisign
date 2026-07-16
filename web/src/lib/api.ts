@@ -1,7 +1,12 @@
 'use client';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-export const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+// Empty value means "same origin" — used when the dashboard is served by the API server itself.
+export const API_URL = process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.trim()
+  ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
+  : '';
+export const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL && process.env.NEXT_PUBLIC_SOCKET_URL.trim()
+  ? process.env.NEXT_PUBLIC_SOCKET_URL.replace(/\/$/, '')
+  : '';
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -36,7 +41,8 @@ export async function apiFetch<T = any>(
     headers['Content-Type'] = 'application/json';
   }
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const url = (API_URL || '') + path;
+  const res = await fetch(url, { ...options, headers });
   if (!res.ok) {
     let msg = `Request failed (${res.status})`;
     try {

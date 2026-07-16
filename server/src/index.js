@@ -5,7 +5,8 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
+import fs from 'fs';
 
 import { config, isProd } from './config.js';
 import logger from './logger.js';
@@ -78,6 +79,12 @@ async function main() {
       res.status(500).json({ error: e.message });
     }
   });
+
+  // Dashboard (static export of the Next.js app, served by the API server in a single container)
+  const webOut = resolve(__dirname, '..', '..', 'web', 'out');
+  if (fs.existsSync(webOut)) {
+    app.use(express.static(webOut, { extensions: ['html'] }));
+  }
 
   // 404
   app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
