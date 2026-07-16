@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LumiSign Player</title>
+  <link rel="stylesheet" href="player.css" />
+</head>
+<body>
+  <div id="stage">
+    <div id="media-container"></div>
+    <div id="overlay">
+      <div id="clock"></div>
+      <div id="status-bar">
+        <span id="dev-name"></span>
+        <span id="conn-dot" class="off"></span>
+        <span id="conn-text">connecting…</span>
+      </div>
+    </div>
+    <div id="boot-screen">
+      <div class="logo">LumiSign</div>
+      <div class="sub">Player initializing…</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>

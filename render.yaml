@@ -1,0 +1,64 @@
+# Render Blueprint — deploys the whole LumiSign stack (API + DB + Redis + Dashboard)
+# Usage: push this repo to GitHub, then in Render: New → Blueprint → connect repo.
+# After deploy, set these env vars manually (Render can't auto-resolve web-service URLs):
+#   lumisign-server  CORS_ORIGIN        = https://<lumisign-web>.onrender.com
+#   lumisign-web     NEXT_PUBLIC_API_URL   = https://<lumisign-server>.onrender.com
+#   lumisign-web     NEXT_PUBLIC_SOCKET_URL = https://<lumisign-server>.onrender.com
+
+databases:
+  - name: lumisign-db
+    databaseName: lumisign
+    user: lumisign
+    plan: free
+    postgresVersion: "16"
+  - name: lumisign-redis
+    plan: free
+
+services:
+  - type: web
+    name: lumisign-server
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromService: { name: lumisign-db, type: postgres, property: host }
+      - key: DB_PORT
+        fromService: { name: lumisign-db, type: postgres, property: port }
+      - key: DB_NAME
+        fromService: { name: lumisign-db, type: postgres, property: database }
+      - key: DB_USER
+        fromService: { name: lumisign-db, type: postgres, property: user }
+      - key: DB_PASSWORD
+        fromService: { name: lumisign-db, type: postgres, property: password }
+      - key: REDIS_URL
+        fromService: { name: lumisign-redis, type: redis, property: connectionString }
+      - key: REDIS_ENABLED
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        value: admin@lumisign.io
+      - key: SEED_ADMIN_PASSWORD
+        value: Admin@12345
+
+  - type: web
+    name: lumisign-web
+    runtime: docker
+    dockerfilePath: ./web/Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_SOCKET_URL
+        sync: false
