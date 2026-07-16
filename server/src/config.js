@@ -10,13 +10,29 @@ export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
   serverPublicUrl: process.env.SERVER_PUBLIC_URL || `http://localhost:${process.env.PORT || 4000}`,
 
-  db: {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    name: process.env.DB_NAME || 'lumisign',
-    user: process.env.DB_USER || 'lumisign',
-    password: process.env.DB_PASSWORD || 'change_me_strong_password',
-  },
+  // Prefer DATABASE_URL (provided by Railway / many PaaS managed Postgres plugins)
+  db: (() => {
+    const fallback = {
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432', 10),
+      name: process.env.DB_NAME || 'lumisign',
+      user: process.env.DB_USER || 'lumisign',
+      password: process.env.DB_PASSWORD || 'change_me_strong_password',
+    };
+    if (!process.env.DATABASE_URL) return fallback;
+    try {
+      const u = new URL(process.env.DATABASE_URL);
+      return {
+        host: u.hostname,
+        port: u.port ? parseInt(u.port, 10) : 5432,
+        name: u.pathname.replace(/^\//, '') || 'lumisign',
+        user: decodeURIComponent(u.username) || 'lumisign',
+        password: decodeURIComponent(u.password) || '',
+      };
+    } catch {
+      return fallback;
+    }
+  })(),
 
   redis: {
     enabled: process.env.REDIS_ENABLED !== 'false',

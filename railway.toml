@@ -1,0 +1,36 @@
+# Railway Blueprint — full LumiSign stack.
+# Railway auto-injects DATABASE_URL (Postgres plugin) and REDIS_URL (Redis plugin)
+# into every service, which the server reads directly. After deploy, set in the
+# dashboard:
+#   server  -> CORS_ORIGIN = https://<web-service-url>.railway.app
+#   web     -> NEXT_PUBLIC_API_URL / NEXT_PUBLIC_SOCKET_URL = https://<server-service-url>.railway.app
+
+[[services]]
+name = "server"
+rootDirectory = "server"
+dockerfilePath = "server/Dockerfile"
+healthcheckPath = "/health"
+restartPolicyType = "on_failure"
+[services.env]
+NODE_ENV = "production"
+REDIS_ENABLED = "true"
+JWT_SECRET = "replace-with-a-strong-secret"
+SEED_ADMIN_EMAIL = "admin@lumisign.io"
+SEED_ADMIN_PASSWORD = "Admin@12345"
+
+[[services]]
+name = "web"
+rootDirectory = "web"
+dockerfilePath = "web/Dockerfile"
+healthcheckPath = "/"
+restartPolicyType = "on_failure"
+[services.env]
+NODE_ENV = "production"
+
+[[plugins]]
+name = "postgresql"
+config = {}
+
+[[plugins]]
+name = "redis"
+config = {}
